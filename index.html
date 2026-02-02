@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PMGC | البطولة الرسمية</title>
+<style>
+*{box-sizing:border-box;font-family:'Cairo',sans-serif;margin:0;padding:0}
+body{background:#000;color:#fff;overflow-x:hidden}
+video.bg{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:-3}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:-2}
+.fire{position:fixed;bottom:0;left:0;width:100%;height:150px;background:url("https://i.imgur.com/8Qf4JQF.gif") repeat-x;opacity:.8;z-index:2;pointer-events:none}
+.container{max-width:450px;margin:20px auto;padding:20px;background:linear-gradient(180deg,rgba(20,20,20,.95),rgba(0,0,0,.95));border-radius:25px;border:2px solid #ff4500;box-shadow:0 0 35px #ff4500,0 0 100px #ff0000;animation:zoom 1s ease}
+@keyframes zoom{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+h1{text-align:center;font-size:32px;color:#ffae00;text-shadow:0 0 10px #ff4500,0 0 30px #ff0000;margin-bottom:20px}
+input,select,button,textarea{width:100%;padding:12px;margin:8px 0;border-radius:12px;border:none;font-size:15px}
+input,select,textarea{background:#111;color:#fff;border:1px solid #ff4500}
+button{background:linear-gradient(135deg,#ff4500,#ffae00);font-weight:900;color:#000;cursor:pointer;transition:.3s}
+button:hover{transform:scale(1.05)}
+.page{display:none}
+.card, .comment{border:1px solid #ff4500;border-radius:15px;padding:12px;margin:10px 0;background:rgba(255,69,0,.08);position:relative;animation:fadeIn 0.7s ease}
+@keyframes fadeIn{from{opacity:0;transform:scale(0.8)}to{opacity:1;transform:scale(1)}}
+.comment .owner{color:#00ffff;font-weight:bold;text-shadow:0 0 5px #00ffff;margin-bottom:3px;display:inline-block;position:relative}
+.comment .badge{position:absolute;top:-10px;right:-10px;background:#ff0;color:#000;padding:2px 6px;border-radius:12px;font-size:12px;animation:slideBadge 2s infinite alternate}
+@keyframes slideBadge{0%{transform:translateX(0)}100%{transform:translateX(-10px)}}
+.comment audio{margin-top:5px;width:100%}
+.sticker{position:absolute;width:35px;height:35px;animation:stickerAnim 1s ease;pointer-events:none}
+@keyframes stickerAnim{0%{transform:scale(0)}50%{transform:scale(1.3)}100%{transform:scale(1)}}
+.nav{display:flex;flex-direction:column;gap:12px;margin-bottom:15px}
+.footer{text-align:center;font-size:13px;opacity:.8;margin-top:10px}
+#logo{display:block;margin:0 auto 15px;width:120px;border-radius:20px;box-shadow:0 0 20px #ff4500}
+</style>
+</head>
+<body>
+
+<video class="bg" autoplay muted loop>
+<source src="https://cdn.coverr.co/videos/coverr-soldier-running-through-smoke-1576/1080p.mp4">
+</video>
+<div class="overlay"></div>
+<div class="fire"></div>
+
+<div class="container">
+
+<!-- Logo -->
+<img src="logo.png" alt="Logo" id="logo">
+
+<h1>🔥 PMGC 🔥</h1>
+
+<!-- Home -->
+<div id="home" class="page">
+<div class="nav">
+<button onclick="go('apply')">🎮 التقديم</button>
+<button onclick="go('results');renderResults()">🏆 النتائج</button>
+<button onclick="go('comments');renderComments()">💬 التعليقات</button>
+<button onclick="go('admin')">🔐 لوحة التحكم</button>
+</div>
+</div>
+
+<!-- Apply -->
+<div id="apply" class="page">
+<input id="name" placeholder="اسم اللاعب">
+<input id="pid" placeholder="ID اللاعب">
+<input id="rank" placeholder="الرنك">
+<input id="ping" placeholder="البنج">
+<select id="room">
+<option>Room 1</option>
+<option>Room 2</option>
+<option>Room 3</option>
+<option>Room 4</option>
+</select>
+<button onclick="apply()">تقديم + واتساب</button>
+<button onclick="go('home')">رجوع</button>
+</div>
+
+<!-- Results -->
+<div id="results" class="page">
+<div id="resultsBox"></div>
+<button onclick="go('home')">رجوع</button>
+</div>
+
+<!-- Comments -->
+<div id="comments" class="page">
+<h2>💬 التعليقات</h2>
+<div id="commentsBox" style="position:relative"></div>
+<input id="commentName" placeholder="اسمك">
+<input id="commentEdu" placeholder="التعليم">
+<textarea id="newComment" placeholder="اكتب تعليقك هنا"></textarea>
+<input type="file" id="commentAudio" accept="audio/*">
+<select id="sticker">
+<option>🔥</option>
+<option>💥</option>
+<option>🌟</option>
+<option>❤️</option>
+</select>
+<button onclick="addComment()">أرسل التعليق</button>
+<button onclick="go('home')">رجوع</button>
+</div>
+
+<!-- Admin -->
+<div id="admin" class="page">
+<h2>لوحة التحكم</h2>
+<input id="pass" type="password" placeholder="كلمة السر">
+<button onclick="loginAdmin()">دخول</button>
+<div id="adminPanel" style="display:none">
+<h3>المتقدمين</h3>
+<div id="adminBox"></div>
+<button onclick="logoutAdmin()">خروج</button>
+</div>
+<button onclick="go('home')">رجوع</button>
+</div>
+
+<div class="footer">تحت إشراف المستفز<br>📞 2001270382949</div>
+
+<script>
+function go(p){document.querySelectorAll('.page').forEach(x=>x.style.display='none');document.getElementById(p).style.display='block'}
+go('home');
+
+function apply(){
+let n=name.value.trim(),i=pid.value.trim(),r=room.value,rankVal=rank.value,pingVal=ping.value;
+if(!n||!i||!rankVal||!pingVal){alert("اكمل كل البيانات");return;}
+let players=JSON.parse(localStorage.getItem("pmgc")||"[]");
+let points=10+Math.floor(Math.random()*10);
+players.push({name:n,id:i,room:r,rank:rankVal,ping:pingVal,points});
+localStorage.setItem("pmgc",JSON.stringify(players));
+let waText=`🔥 PMGC 🔥\nالاسم: ${n}\nID: ${i}\nالرنك: ${rankVal}\nالبنج: ${pingVal}\nالروم: ${r}\nالنقاط: ${points}`;
+window.open(`https://wa.me/2001270382949?text=${encodeURIComponent(waText)}`);
+name.value=pid.value=rank.value=ping.value="";
+confetti();
+}
+
+function renderResults(){
+let box=document.getElementById("resultsBox");box.innerHTML="<h2 style='text-align:center'>🏆 النتائج</h2>";
+let p=JSON.parse(localStorage.getItem("pmgc")||"[]");p.sort((a,b)=>b.points-a.points);
+p.forEach((x,i)=>{box.innerHTML+=`<div class="card ${i==0?'first':''}">${i==0?'👑 المركز الأول':''}<p>${x.name}</p><p>${x.room}</p><p>${x.rank} | ${x.ping}</p><p>${x.points} نقطة</p></div>`});
+}
+
+let fakeComments=[
+{user:"أحمد من مصر",edu:"ثانوي",text:"نفسي ترد عليا مستفز"},
+{user:"منى من مصر",edu:"جامعة",text:"الاداء حلو"},
+{user:"سامي من مصر",edu:"ثانوي",text:"يارب أكسب"}
+];
+const OWNER="المستفز"; 
+
+function renderComments(){
+let box=document.getElementById("commentsBox");box.innerHTML="";
+let comments=JSON.parse(localStorage.getItem("pmgcComments")||"[]");
+let all=[...fakeComments,...comments];
+all.forEach(c=>{
+let badge=c.user===OWNER?`<span class="badge">👑 ملك الموقع</span>`:"";
+let ownerName=c.user===OWNER?`<span class="owner">${c.user} ${badge}</span>`:`<strong>${c.user} (${c.edu})</strong>`;
+let text=c.user===OWNER?`حبيبي يا قلبي ❤️`:`${c.text}`;
+let audioHTML=c.audio?`<audio controls src="${c.audio}"></audio>`:"";
+box.innerHTML+=`<div class="comment" style="position:relative">${ownerName}<p>${text}</p>${audioHTML}</div>`;
+if(c.sticker){let s=document.createElement("div");s.className="sticker";s.innerText=c.sticker;let rect=box.lastChild.getBoundingClientRect();s.style.top=rect.top+window.scrollY+"px";s.style.left=(rect.left+100)+"px";document.body.appendChild(s);setTimeout(()=>s.remove(),1200)}
+if(c.user===OWNER && c.text){speechSynthesis.speak(new SpeechSynthesisUtterance(c.text))};
+});
+}
+
+function addComment(){
+let n=document.getElementById("commentName").value.trim();
+let e=document.getElementById("commentEdu").value.trim();
+let t=document.getElementById("newComment").value.trim();
+let f=document.getElementById("commentAudio").files[0];
+let st=document.getElementById("sticker").value;
+if(!n||!e){alert("اكمل الاسم والتعليم");return;}
+let audioURL=f?URL.createObjectURL(f):null;
+let comments=JSON.parse(localStorage.getItem("pmgcComments")||"[]");
+comments.push({user:n,edu:e,text:t,audio:audioURL,sticker:st});
+localStorage.setItem("pmgcComments",JSON.stringify(comments));
+document.getElementById("commentName").value="";
+document.getElementById("commentEdu").value="";
+document.getElementById("newComment").value="";
+document.getElementById("commentAudio").value="";
+renderComments();
+}
+
+function confetti(){for(let i=0;i<40;i++){let d=document.createElement("div");d.style.position="fixed";d.style.left=Math.random()*100+"%";d.style.top="-10px";d.style.width="8px";d.style.height="8px";d.style.background=["#ff4500","#ffd700","#ff0000"][i%3];d.style.animation="fall 2s linear";document.body.appendChild(d);setTimeout(()=>d.remove(),2000))}}
+let s=document.createElement("style");s.innerHTML="@keyframes fall{to{transform:translateY(110vh)}}";document.head.appendChild(s);
+
+const ADMIN_PASS="PMGC_ADMIN";
+function loginAdmin(){let p=pass.value.trim();if(p===ADMIN_PASS){document.getElementById("adminPanel").style.display='block';pass.value='';renderAdmin()}else alert("كلمة سر خطأ")}
+function logoutAdmin(){document.getElementById("adminPanel").style.display='none'}
+function renderAdmin(){let box=document.getElementById("adminBox");box.innerHTML="";let p=JSON.parse(localStorage.getItem("pmgc")||"[]");p.forEach((x,i)=>{box.innerHTML+=`<div class="card">${i+1}. ${x.name} | ${x.room} | ${x.rank} | ${x.ping} | ${x.points} نقطة</div>`})}
+</script>
+
+</body>
+</html>
