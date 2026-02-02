@@ -39,6 +39,8 @@ button:hover{transform:scale(1.05)}
 <div class="overlay"></div>
 <div class="fire"></div>
 
+<audio id="welcomeAudio" src="welcome_with_music.mp3" autoplay loop></audio>
+
 <div class="container">
 
 <img src="914512268067030319.jpeg" alt="Logo" id="logo">
@@ -116,6 +118,12 @@ button:hover{transform:scale(1.05)}
 function go(p){document.querySelectorAll('.page').forEach(x=>x.style.display='none');document.getElementById(p).style.display='block'}
 go('home');
 
+// تشغيل الصوت الترحيبي
+window.addEventListener('load', () => {
+  const audio = document.getElementById('welcomeAudio');
+  audio.play().catch(()=>console.log("Autoplay blocked"));
+});
+
 // التقديم
 function apply(){
 let n=name.value.trim(),i=pid.value.trim(),r=room.value,rankVal=rank.value,pingVal=ping.value;
@@ -124,8 +132,9 @@ let players=JSON.parse(localStorage.getItem("pmgc")||"[]");
 let points=10+Math.floor(Math.random()*10);
 players.push({name:n,id:i,room:r,rank:rankVal,ping:pingVal,points});
 localStorage.setItem("pmgc",JSON.stringify(players));
+let waNumber="2001270382949"; // رقمك
 let waText=`🔥 PMGC 🔥\nالاسم: ${n}\nID: ${i}\nالرنك: ${rankVal}\nالبنج: ${pingVal}\nالروم: ${r}\nالنقاط: ${points}`;
-window.open(`https://wa.me/2001270382949?text=${encodeURIComponent(waText)}`);
+window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(waText)}`);
 name.value=pid.value=rank.value=ping.value="";
 confetti();
 }
@@ -134,7 +143,7 @@ confetti();
 function renderResults(){
 let box=document.getElementById("resultsBox");box.innerHTML="<h2 style='text-align:center'>🏆 النتائج</h2>";
 let p=JSON.parse(localStorage.getItem("pmgc")||"[]");p.sort((a,b)=>b.points-a.points);
-p.forEach((x,i)=>{box.innerHTML+=`<div class="card ${i==0?'first':''}">${i==0?'👑 المركز الأول':''}<p>${x.name}</p><p>${x.room}</p><p>${x.rank} | ${x.ping}</p><p>${x.points} نقطة</p></div>`});
+p.forEach((x,i)=>{box.innerHTML+=`<div class="card">${i==0?'👑 المركز الأول':''}<p>${x.name}</p><p>${x.room}</p><p>${x.rank} | ${x.ping}</p><p>${x.points} نقطة</p></div>`});
 }
 
 // التعليقات
@@ -144,7 +153,6 @@ let fakeComments=[
 {user:"سامي من مصر",edu:"ثانوي",text:"يارب أكسب"}
 ];
 const OWNER="المستفز"; 
-
 function renderComments(){
 let box=document.getElementById("commentsBox");box.innerHTML="";
 let comments=JSON.parse(localStorage.getItem("pmgcComments")||"[]");
@@ -154,8 +162,8 @@ let badge=c.user===OWNER?`<span class="badge">👑 ملك الموقع</span>`:"
 let ownerName=c.user===OWNER?`<span class="owner">${c.user} ${badge}</span>`:`<strong>${c.user} (${c.edu})</strong>`;
 let text=c.user===OWNER?`حبيبي يا قلبي ❤️`:`${c.text}`;
 let audioHTML=c.audio?`<audio controls src="${c.audio}"></audio>`:"";
-box.innerHTML+=`<div class="comment" style="position:relative">${ownerName}<p>${text}</p>${audioHTML}</div>`;
-if(c.sticker){let s=document.createElement("div");s.className="sticker";s.innerText=c.sticker;let rect=box.lastChild.getBoundingClientRect();s.style.top=rect.top+window.scrollY+"px";s.style.left=(rect.left+100)+"px";document.body.appendChild(s);setTimeout(()=>s.remove(),1200)}
+box.innerHTML+=`<div class="comment">${ownerName}<p>${text}</p>${audioHTML}</div>`;
+if(c.sticker){let s=document.createElement("div");s.className="sticker";s.innerText=c.sticker;document.body.appendChild(s);setTimeout(()=>s.remove(),1200)}
 if(c.user===OWNER && c.text){speechSynthesis.speak(new SpeechSynthesisUtterance(c.text))};
 });
 }
