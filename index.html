@@ -39,15 +39,20 @@ button:hover{transform:scale(1.05)}
 <div class="overlay"></div>
 <div class="fire"></div>
 
-<audio id="welcomeAudio" src="welcome_with_music.mp3" autoplay loop></audio>
+<audio id="welcomeAudio" src="welcome_with_music.mp3" loop></audio>
 
 <div class="container">
 
-<img src="914512268067030319.jpeg" alt="Logo" id="logo">
+<!-- صفحة البداية -->
+<div id="welcomePage" style="display:block;text-align:center;padding:50px">
+  <img src="914512268067030319.jpeg" alt="Logo" style="width:150px;margin-bottom:20px">
+  <h1 style="color:#ffae00;text-shadow:0 0 10px #ff4500">🔥 PMGC 🔥</h1>
+  <button id="enterBtn" style="padding:15px 25px;font-size:18px;border-radius:15px;background:linear-gradient(135deg,#ff4500,#ffae00);border:none;cursor:pointer;color:#000;font-weight:bold">
+    دخول الموقع
+  </button>
+</div>
 
-<h1>🔥 PMGC 🔥</h1>
-
-<!-- الرئيسية -->
+<!-- باقي صفحات الموقع -->
 <div id="home" class="page">
 <div class="nav">
 <button onclick="go('apply')">🎮 التقديم</button>
@@ -57,7 +62,6 @@ button:hover{transform:scale(1.05)}
 </div>
 </div>
 
-<!-- التقديم -->
 <div id="apply" class="page">
 <input id="name" placeholder="اسم اللاعب">
 <input id="pid" placeholder="ID اللاعب">
@@ -73,13 +77,11 @@ button:hover{transform:scale(1.05)}
 <button onclick="go('home')">رجوع</button>
 </div>
 
-<!-- النتائج -->
 <div id="results" class="page">
 <div id="resultsBox"></div>
 <button onclick="go('home')">رجوع</button>
 </div>
 
-<!-- التعليقات -->
 <div id="comments" class="page">
 <h2>💬 التعليقات</h2>
 <div id="commentsBox" style="position:relative"></div>
@@ -99,7 +101,6 @@ button:hover{transform:scale(1.05)}
 <button onclick="go('home')">رجوع</button>
 </div>
 
-<!-- لوحة التحكم -->
 <div id="admin" class="page">
 <h2>لوحة التحكم</h2>
 <input id="pass" type="password" placeholder="كلمة السر">
@@ -115,16 +116,15 @@ button:hover{transform:scale(1.05)}
 <div class="footer">تحت إشراف المستفز<br>📞 2001270382949</div>
 
 <script>
-function go(p){document.querySelectorAll('.page').forEach(x=>x.style.display='none');document.getElementById(p).style.display='block'}
-go('home');
-
-// تشغيل الصوت الترحيبي
-window.addEventListener('load', () => {
-  const audio = document.getElementById('welcomeAudio');
-  audio.play().catch(()=>console.log("Autoplay blocked"));
+const audio=document.getElementById('welcomeAudio');
+document.getElementById('enterBtn').addEventListener('click',()=>{
+audio.play().catch(()=>console.log("Autoplay blocked"));
+document.getElementById('welcomePage').style.display='none';
+document.getElementById('home').style.display='block';
 });
 
-// التقديم
+function go(p){document.querySelectorAll('.page').forEach(x=>x.style.display='none');document.getElementById(p).style.display='block'}
+
 function apply(){
 let n=name.value.trim(),i=pid.value.trim(),r=room.value,rankVal=rank.value,pingVal=ping.value;
 if(!n||!i||!rankVal||!pingVal){alert("اكمل كل البيانات");return;}
@@ -132,26 +132,20 @@ let players=JSON.parse(localStorage.getItem("pmgc")||"[]");
 let points=10+Math.floor(Math.random()*10);
 players.push({name:n,id:i,room:r,rank:rankVal,ping:pingVal,points});
 localStorage.setItem("pmgc",JSON.stringify(players));
-let waNumber="2001270382949"; // رقمك
+let waNumber="2001270382949";
 let waText=`🔥 PMGC 🔥\nالاسم: ${n}\nID: ${i}\nالرنك: ${rankVal}\nالبنج: ${pingVal}\nالروم: ${r}\nالنقاط: ${points}`;
 window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(waText)}`);
 name.value=pid.value=rank.value=ping.value="";
 confetti();
 }
 
-// عرض النتائج
 function renderResults(){
 let box=document.getElementById("resultsBox");box.innerHTML="<h2 style='text-align:center'>🏆 النتائج</h2>";
 let p=JSON.parse(localStorage.getItem("pmgc")||"[]");p.sort((a,b)=>b.points-a.points);
 p.forEach((x,i)=>{box.innerHTML+=`<div class="card">${i==0?'👑 المركز الأول':''}<p>${x.name}</p><p>${x.room}</p><p>${x.rank} | ${x.ping}</p><p>${x.points} نقطة</p></div>`});
 }
 
-// التعليقات
-let fakeComments=[
-{user:"أحمد من مصر",edu:"ثانوي",text:"نفسي ترد عليا مستفز"},
-{user:"منى من مصر",edu:"جامعة",text:"الاداء حلو"},
-{user:"سامي من مصر",edu:"ثانوي",text:"يارب أكسب"}
-];
+let fakeComments=[{user:"أحمد من مصر",edu:"ثانوي",text:"نفسي ترد عليا مستفز"},{user:"منى من مصر",edu:"جامعة",text:"الاداء حلو"},{user:"سامي من مصر",edu:"ثانوي",text:"يارب أكسب"}];
 const OWNER="المستفز"; 
 function renderComments(){
 let box=document.getElementById("commentsBox");box.innerHTML="";
@@ -186,11 +180,9 @@ document.getElementById("commentAudio").value="";
 renderComments();
 }
 
-// Confetti
 function confetti(){for(let i=0;i<50;i++){let d=document.createElement("div");d.style.position="fixed";d.style.left=Math.random()*100+"%";d.style.top="-10px";d.style.width="8px";d.style.height="8px";d.style.background=["#ff4500","#ffd700","#ff0000","#00ffff","#00ff00"][i%5];d.style.animation="fall 2s linear";document.body.appendChild(d);setTimeout(()=>d.remove(),2000)}}
 let s=document.createElement("style");s.innerHTML="@keyframes fall{to{transform:translateY(110vh)}}";document.head.appendChild(s);
 
-// لوحة التحكم
 const ADMIN_PASS="PMGC_ADMIN";
 function loginAdmin(){let p=pass.value.trim();if(p===ADMIN_PASS){document.getElementById("adminPanel").style.display='block';pass.value='';renderAdmin()}else alert("كلمة سر خطأ")}
 function logoutAdmin(){document.getElementById("adminPanel").style.display='none'}
